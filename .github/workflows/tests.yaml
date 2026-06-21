@@ -38,11 +38,6 @@ jobs:
           echo "run_spsc=true" >> $GITHUB_OUTPUT
         fi
 
-        # MPSC
-        if echo "$CHANGED_FILES" | grep -E "lockfree_mpsc"; then
-          echo "run_mpsc=true" >> $GITHUB_OUTPUT
-        fi
-
         # MPMC
         if echo "$CHANGED_FILES" | grep -E "lockfree_mpmc|blocking_mpmc"; then
           echo "run_mpmc=true" >> $GITHUB_OUTPUT
@@ -53,11 +48,7 @@ jobs:
           echo "run_spsc=true" >> $GITHUB_OUTPUT
         fi
 
-        if echo "$CHANGED_FILES" | grep -E "test_mpsc.cpp"; then
-          echo "run_mpsc=true" >> $GITHUB_OUTPUT
-        fi
-
-        if echo "$CHANGED_FILES" | grep -E "test_mpmc.cpp"; then
+        if echo "$CHANGED_FILES" | grep -E "test_mpmc_unbounded_blocking.cpp|test_mpmc_bounded_lockfree.cpp"; then
           echo "run_mpmc=true" >> $GITHUB_OUTPUT
         fi
 
@@ -87,13 +78,12 @@ jobs:
       if: steps.changes.outputs.run_spsc == 'true'
       run: cd build && ./test_spsc
 
-    - name: Run MPSC tests
-      if: steps.changes.outputs.run_mpsc == 'true'
-      run: cd build && ./test_mpsc
-
     - name: Run MPMC tests
       if: steps.changes.outputs.run_mpmc == 'true'
-      run: cd build && ./test_mpmc
+      run: |
+        cd build
+        ./test_mpmc_unbounded_blocking
+        ./test_mpmc_bounded_lockfree
 
     # 🔹 Safety net (always runs)
     - name: Run full test suite (safety)
